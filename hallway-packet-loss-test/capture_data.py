@@ -15,10 +15,29 @@ def ping():
         ping_output=subprocess.run(['ping','-c','1','-W','0.1','ahti.d.umn.edu'],timeout=0.4,stdout=subprocess.PIPE)
         ping_ms=ping_output.stdout.decode().split("\n")[1].split()[-2].split("=")[1]
     except:
-        return "timeout"
+        return "401"
     return ping_ms
 
-
-while True:
-    print("%s,%s,%s" % (time.time(), get_ssid(), ping()))
-    time.sleep(0.1)
+last_time = time.time()
+results = []
+try:
+    while True:
+        time_res = time.time()
+        ssid_res = get_ssid()
+        ping_res = ping()
+        print("%s,%s,%s" % (time_res, ssid_res, ping_res))
+        results.append({'time': time_res, 'ssid': ssid_res, 'ping': ping_res})
+        time_to_next_ping = last_time + 0.2 - time.time()
+        print(time_to_next_ping)
+        if time_to_next_ping < 0:
+            time_to_next_ping = 0
+        last_time += .2
+        time.sleep(time_to_next_ping)
+except KeyboardInterrupt:
+    import csv
+    with open(input('filename to write to: '), 'w', newline='') as csvfile:
+        fieldnames = ['time', 'ssid', 'ping']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        for result in results:
+            writer.writerow(result)
