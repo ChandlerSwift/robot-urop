@@ -36,8 +36,8 @@ control. This can be thought of as a specific example of the general problem
 of establishing reliable communication over an unreliable network, such a
 last-mile internet connection over failing cable or a satellite internet
 connection, and will build off other efforts to minimize the effects of
-latency such as those applied in game development (Naone, 2007) and in other
-cases such as Voice over IP calling (Brunstrum,  et al., 2016).
+latency such as those applied in game development\cite{reducinglag} and in other
+cases such as Voice over IP calling\cite{briscoe2014reducing}.
 
 Specifically, in our use case, we have difficulty reliably driving the robot
 across campus, as it must transition between access points, a task that takes
@@ -110,46 +110,46 @@ and averaged over eight runs. This was done for both the software as it had
 previously existed, and for the software with the watchdog code added.
 
 \section{Results}
+The full set of data can be found and browsed at the GitHub repository
+containing this research\cite{uropgithub}. The first section, packet loss
+testing, is available in the directory \texttt{hallway-packet-loss-test},
+and the second, the watchdog timer comparison, is located in 
+\texttt{watchdog-timer-data}.
+
 The hallway packet loss testing showed substantial improvements utilizing the
 Canakit adapter externally as compared to using it internally. 
 
 
 \section{Discussion}
-discussion discussion discussion discussion discussion discussion discussion
-discussion discussion discussion discussion discussion discussion discussion
-discussion discussion discussion discussion discussion discussion discussion
-discussion discussion discussion discussion discussion discussion discussion
-discussion discussion discussion discussion discussion discussion discussion
-discussion discussion discussion discussion discussion discussion discussion
-discussion discussion discussion discussion discussion discussion discussion
-discussion discussion discussion discussion discussion discussion discussion
-discussion discussion discussion discussion discussion discussion discussion
-discussion discussion discussion discussion discussion discussion discussion
-discussion discussion discussion discussion discussion discussion discussion
-discussion discussion discussion discussion discussion discussion discussion
-discussion discussion discussion discussion discussion discussion discussion
-discussion discussion discussion discussion discussion discussion discussion
-discussion discussion discussion discussion discussion discussion discussion
-discussion discussion discussion discussion discussion discussion discussion
-discussion discussion discussion discussion discussion discussion discussion
+From the results, we see that 
 
 
 \section{Conclusions}
-Conclusions/Further Direction
-conclusions conclusions conclusions conclusions conclusions conclusions conclusions 
-conclusions conclusions conclusions conclusions conclusions conclusions conclusions 
-conclusions conclusions conclusions conclusions conclusions conclusions conclusions 
-conclusions conclusions conclusions conclusions conclusions conclusions conclusions 
-conclusions conclusions conclusions conclusions conclusions conclusions conclusions 
-conclusions conclusions conclusions conclusions conclusions conclusions conclusions 
-conclusions conclusions conclusions conclusions conclusions conclusions conclusions 
-conclusions conclusions conclusions conclusions conclusions conclusions conclusions 
-conclusions conclusions conclusions conclusions conclusions conclusions conclusions 
-conclusions conclusions conclusions conclusions conclusions conclusions conclusions 
-conclusions conclusions conclusions conclusions conclusions conclusions conclusions 
-conclusions conclusions conclusions conclusions conclusions conclusions conclusions 
-In the future, more avenues for research...kernel...etc
+Based on the data gathered over the course of the research, it appears that
+the combination of improved hardware selection and placement with the added
+improvement of a low-threshold watchdog timer to stop the robot in the absence
+of a connection results in a stable robot connection. This serves to both
+minimize the amount of interruption perceived in connection as the robot
+navigates across the coverage regions of various access points on-campus, as
+well as minimize the negative impacts that this interruption in a consistent
+wireless control connection might otherwise provide. Together, these changes
+as designed and tested provide a qualitatively much more pleasant user
+experience for remote control and navigation of the robot, and, indeed,
+driving after the changes were implemented was subjectively a much easier task
+than previously.
 
+However, it is still not a perfect task, and there are many avenues left for
+possible continued improvement. At the physical layer, adding a second
+network card would provide failover capability, and could potentially be
+configured such that one network is always connected at a time, with packets
+routed over the strongest (or over both). At the TCP/IP layers, tuning the
+protocol parameters such as the TCP retry window could potentially make for
+less delay and perceived latency when the robot does reconnect to the network.
+Also, prioritizing the control data over the video with Quality-of-Service
+scheduling would reduce packet congestion during periods of low goodput, such
+as when there is a high signal-to-noise ratio. Finally, the methods we used
+in this experiment could be repeated, but gathering additional data such
+as the signal-to-noise ratio as reported by the wireless cards.
 
 \bibliography{report}
 \bibliographystyle{unsrt}
