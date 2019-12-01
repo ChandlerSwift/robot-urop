@@ -1,0 +1,180 @@
+\documentclass[letterpaper, 11pt]{article} 
+\usepackage{multicol}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage[margin=2cm]{geometry}
+
+\setlength{\parskip}{0.2cm}
+\setlength{\parindent}{0pt}
+
+
+\title{Building a Resilient Control Scheme over Unreliable Wireless Networks}
+\author{Chandler Swift \\ \\
+  Spring--Fall 2019 \\
+  Computer Science Department \\
+  Advisor: Dr. Peter A. H. Peterson \\
+  Computer Science Department \\
+  University of Minnesota, Duluth
+}
+\date{November 30, 2019}
+\begin{document}
+
+\maketitle
+\section{Introduction}
+\begin{multicols}{2}
+% TODO: don't announce the topic here.
+The purpose of this study is to develop a method of network communication and
+control of a remotely drivable research robot to enable effective network
+control. This can be thought of as a specific example of the general problem
+of establishing reliable communication over an unreliable network, such a
+last-mile internet connection over failing cable or a satellite internet
+connection, and will build off other efforts to minimize the effects of
+latency such as those applied in game development (Naone, 2007) and in other
+cases such as Voice over IP calling (Brunstrum,  et al., 2016).
+
+Specifically, in our use case, we have difficulty reliably driving the robot
+across campus, as it must transition between access points, a task that takes
+potentally ten to fifteen seconds, in which time control and communication to
+the robot are lost. The way the control system for the robot was designed at
+the beginning of this research meant that the robot would continue to drive
+even after connection was lost, potentially running into obstacles or
+otherwise causing itself damage.
+
+With the end goal of navigating across campus with resilience to changing
+wireless access points, we will attempt to both minimize the time and the
+effect of the transition time between those access points by changing the
+hardware and software networking configuration of the Raspberry Pi which
+acts as a network server for the robot.
+\end{multicols}
+
+\section{Methods}
+\begin{multicols}{2}
+Of the seven layers in the OSI networking model, there are several which we
+can attempt to improve. We can refine the physical layer by adding extra or
+more powerful wireless hardware, which should increase the duration we will
+remain successfully connected to one access point, and minimize the frequency
+of transitions. Additionally, some adapters will likely transition somewhat
+more quickly than others. Having written our own control protocol on top of
+the WebSocket protocol\cite{protocol}, we also explored modifications at the
+protocol layer to minimize the disruption of access point handovers.
+
+We obtained three adapters for the hardware portion of this test. First, we
+use the Canakit-branded wireless adapter that came bundled with a purchased
+Raspberry Pi\cite{canakit}, which is built around a MediaTek RT5370 chipset,
+and supported natively by the Linux kernel. Initially this adapter had been
+directly connected to the Raspberry Pi inside the frame. However, given the
+detrimental effect which the metal frame is likely to have on wireless 
+performance from inside, tests were run with this adapter both inside and
+outside of the robot. Secondly, we purchased a BrosTrend high-gain dual-band
+wireless adapter as a higher-end model to test\cite{brostrend} (built around
+the RealTek 8812au chipset, which is supported natively by the Linux kernel
+as of v4.19). And finally, to gain additional diversity in selection, we
+purchased a third adapter: a TP-Link Archer T2UHP \cite{archer}. However,
+we were unable to get this adapter to work with the Raspberry Pi, nor with
+any other computer we tried, and so this was not used.
+
+With each adapter configuration (Canakit adapter inside the frame; Canakit
+adapter mounted on the top of the robot; BrosTrend adapter mounted on top
+of the robot), we proceeded to make runs down the length of the third
+floor of Heller Hall. Runs were conducted during weekends, where there were
+fewer people present to create additional traffic to potentially disturb
+results. At a consistent speed of approximately one mile per hour (so chosen
+due to this being approximately the top speed of the robot), the robot was
+pushed down the hall while sending ICMP \texttt{echo} packets to a computer
+on the building's wired network. From this, the response time, wall clock
+time, and currently connected access point were measured, 5 times per second,
+until the end of the hallway was reached. Each adapter was tested over the
+course of four runs using a custom-written script\cite{hallway-script}.
+
+We also tested protocol-layer improvements. This was done by adding a
+watchdog timer function\cite{watchdog} into the Raspberry Pi's web server,
+where if a command was not received in 200 milliseconds (commands are
+normally issued ten times per second, or every 100 milliseconds) the drive
+system would be disabled until a new command was received. It is noteworthy
+that the robot's hardware controller does have a watchdog timer built in, but
+the documentation does not suggest that it is configurable from its default
+value of ten seconds, during which time the robot can travel a dangerous
+distance.
+
+Evaluation of the effectiveness of this method was done by driving the robot
+at its full speed down the hall. When it passed a marked "starting line",
+the connection to the robot was cut (specifically, the websocket server which
+connects the client to the robot was interrupted from the console from which
+it was run), and the distance that the robot proceeded to travel was measured, 
+and averaged over eight runs. This was done for both the software as it had
+previously existed, and for the software with the watchdog code added.
+\end{multicols}
+
+\section{Results}
+\begin{multicols}{2}
+The hallway packet loss testing showed substantial results 
+results results results results results results results results results results
+results results results results results results results results results results
+results results results results results results results results results results
+results results results results results results results results results results
+results results results results results results results results results results
+results results results results results results results results results results
+results results results results results results results results results results
+results results results results results results results results results results
+results results results results results results results results results results
+results results results results results results results results results results
+results results results results results results results results results results
+results results results results results results results results results results
+results results results results results results results results results results
+results results results results results results results results results results
+results results results results results results results results results results
+results results results results results results results results results results
+results results results results results results results results results results
+results results results results results results results results results results
+results results results results results results results results results results
+results results results results results results results results results results
+results results results results results results results results results results
+results results results results results results results results results results
+results results results results results results results results results results
+\end{multicols}
+
+\section{Discussion}
+\begin{multicols}{2}
+discussion discussion discussion discussion discussion discussion discussion
+discussion discussion discussion discussion discussion discussion discussion
+discussion discussion discussion discussion discussion discussion discussion
+discussion discussion discussion discussion discussion discussion discussion
+discussion discussion discussion discussion discussion discussion discussion
+discussion discussion discussion discussion discussion discussion discussion
+discussion discussion discussion discussion discussion discussion discussion
+discussion discussion discussion discussion discussion discussion discussion
+discussion discussion discussion discussion discussion discussion discussion
+discussion discussion discussion discussion discussion discussion discussion
+discussion discussion discussion discussion discussion discussion discussion
+discussion discussion discussion discussion discussion discussion discussion
+discussion discussion discussion discussion discussion discussion discussion
+discussion discussion discussion discussion discussion discussion discussion
+discussion discussion discussion discussion discussion discussion discussion
+discussion discussion discussion discussion discussion discussion discussion
+discussion discussion discussion discussion discussion discussion discussion
+\end{multicols}
+
+
+\section{Conclusions}
+\begin{multicols}{2}
+Conclusions/Further Direction
+conclusions conclusions conclusions conclusions conclusions conclusions conclusions 
+conclusions conclusions conclusions conclusions conclusions conclusions conclusions 
+conclusions conclusions conclusions conclusions conclusions conclusions conclusions 
+conclusions conclusions conclusions conclusions conclusions conclusions conclusions 
+conclusions conclusions conclusions conclusions conclusions conclusions conclusions 
+conclusions conclusions conclusions conclusions conclusions conclusions conclusions 
+conclusions conclusions conclusions conclusions conclusions conclusions conclusions 
+conclusions conclusions conclusions conclusions conclusions conclusions conclusions 
+conclusions conclusions conclusions conclusions conclusions conclusions conclusions 
+conclusions conclusions conclusions conclusions conclusions conclusions conclusions 
+conclusions conclusions conclusions conclusions conclusions conclusions conclusions 
+conclusions conclusions conclusions conclusions conclusions conclusions conclusions 
+In the future, more avenues for research...kernel...etc
+\end{multicols}
+
+
+\bibliography{report}
+\bibliographystyle{unsrt}
+
+\end{document}
