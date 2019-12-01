@@ -39,29 +39,29 @@ connection, and will build off other efforts to minimize the effects of
 latency such as those applied in game development\cite{reducinglag} and in other
 cases such as Voice over IP calling\cite{briscoe2014reducing}.
 
-Specifically, in our use case, we have difficulty reliably driving the robot
-across campus, as it must transition between access points, a task that takes
+Specifically, in our use case, we have difficulty reliably traversing campus
+with the robot, as it must transition between access points. This task can take
 potentally ten to fifteen seconds, in which time control and communication to
-the robot are lost. The way the control system for the robot was designed at
-the beginning of this research meant that the robot would continue to drive
+the robot are lost. The way the robot's control system was designed at the time
+of the beginning of this research meant that the robot would continue to drive
 even after connection was lost, potentially running into obstacles or
 otherwise causing itself damage.
 
 With the end goal of navigating across campus with resilience to changing
 wireless access points, we will attempt to both minimize the time and the
-effect of the transition time between those access points by changing the
-hardware and software networking configuration of the Raspberry Pi which
-acts as a network server for the robot.
+effect of the transition between those access points by changing the
+hardware and software networking configuration of the Raspberry Pi acting
+as a network server for the robot.
 
 \section{Methods}
 Of the seven layers in the OSI networking model, there are several which we
-can attempt to improve. We can refine the physical layer by adding extra or
+can attempt to improve. We can refine the physical layer by providing additional or
 more powerful wireless hardware, which should increase the duration we will
 remain successfully connected to one access point, and minimize the frequency
-of transitions. Additionally, some adapters will likely transition somewhat
-more quickly than others. Having written our own control protocol on top of
-the WebSocket protocol\cite{protocol}, we also explored modifications at the
-protocol layer to minimize the disruption of access point handovers.
+and duration of such transitions. Secondly, because we have written our own
+control protocol on top of the WebSocket protocol\cite{protocol}, we also 
+explored modifications which can be made at the
+protocol layer to minimize the disruptive effects of access point handovers.
 
 We obtained three adapters for the hardware portion of this test. First, we
 use the Canakit-branded wireless adapter that came bundled with a purchased
@@ -69,14 +69,16 @@ Raspberry Pi\cite{canakit}, which is built around a MediaTek RT5370 chipset,
 and supported natively by the Linux kernel. Initially this adapter had been
 directly connected to the Raspberry Pi inside the frame. However, given the
 detrimental effect which the metal frame is likely to have on wireless 
-performance from inside, tests were run with this adapter both inside and
+performance from inside, the adapter was moved to use a USB extension and to
+sit outside of the robot. Tests were run with this adapter both inside and
 outside of the robot. Secondly, we purchased a BrosTrend high-gain dual-band
 wireless adapter as a higher-end model to test\cite{brostrend} (built around
 the Realtek 8812au chipset, which is supported natively by the Linux kernel
-as of v4.19). And finally, to gain additional diversity in selection, we
+as of v4.19). To gain additional diversity in selection, we
 purchased a third adapter: a TP-Link Archer T2UHP \cite{archer}. However,
 we were unable to get this adapter to work with the Raspberry Pi, nor with
-any other computer we tried, and so this was not used.
+any other computer we tried, and so this was not used in any of the following
+experiment.
 
 With each adapter configuration (Canakit adapter inside the frame; Canakit
 adapter mounted on the top of the robot; BrosTrend adapter mounted on top
@@ -96,7 +98,8 @@ watchdog timer function\cite{watchdog} into the Raspberry Pi's web server,
 where if a command was not received in 200 milliseconds (commands are
 normally issued ten times per second, or every 100 milliseconds) the drive
 system would be disabled until a new command was received. It is noteworthy
-that the robot's hardware controller does have a watchdog timer built in, but
+that the robot's hardware controller does have a watchdog timer built in. 
+However, this is of limited use to use in attempting to stop the robot, as
 the documentation does not suggest that it is configurable from its default
 value of ten seconds, during which time the robot can travel a dangerous
 distance.
@@ -105,23 +108,66 @@ Evaluation of the effectiveness of this method was done by driving the robot
 at its full speed down the hall. When it passed a marked "starting line",
 the connection to the robot was cut (specifically, the websocket server which
 connects the client to the robot was interrupted from the console from which
-it was run), and the distance that the robot proceeded to travel was measured, 
-and averaged over eight runs. This was done for both the software as it had
-previously existed, and for the software with the watchdog code added.
+it was run), and the distance that the robot proceeded to travel from that
+starting line was measured, and averaged over eight runs.
+This was done for both the software as it had
+previously existed, and for the software with the watchdog code added. To
+reduce the effect of other variables like battery level on the collection of
+this data, the runs of watchdog enabled and watchdog disabled were alternated.
 
 \section{Results}
 The full set of data can be found and browsed at the GitHub repository
 containing this research\cite{uropgithub}. The first section, packet loss
 testing, is available in the directory \texttt{hallway-packet-loss-test},
-and the second, the watchdog timer comparison, is located in 
+and the second, the watchdog timer comparison, is located in
 \texttt{watchdog-timer-data}.
 
-The hallway packet loss testing showed substantial improvements utilizing the
-Canakit adapter externally as compared to using it internally. 
+The hallway packet loss testing showed moderate but consistent improvements
+when utilizing the Canakit adapter as mounted outside of robot's metal frame
+as compared to using it internally.
+
+The internal adapter showed the following data:
+
+\begin{tabular}{ c | c | c | c | c }
+  Run & Total & Failed & Succeeded & Success Rate \\ \hline
+  1 & 635 & 227 & 408 & 64.3\% \\
+  2 & 730 & 226 & 464 & 63.6\% \\
+  3 & 600 & 141 & 459 & 76.5\% \\
+  4 & 552 & 193 & 359 & 65.0\% \\
+  \hline
+  \multicolumn{4}{r}{Average Success Rate:} & 67.3\%
+\end{tabular}
+
+While the external adapter showed the following data:
+
+\begin{tabular}{ c | c | c | c | c }
+  Run & Total & Failed & Succeeded & Success Rate \\ \hline
+  1 & 593 & 242 & 351 & 59.2\% \\
+  2 & 578 & 236 & 342 & 59.2\% \\
+  3 & 591 & 263 & 328 & 55.5\% \\
+  4 & 557 & 278 & 279 & 50.1\% \\
+  \hline
+  \multicolumn{4}{r}{Average Success Rate:} & 56.0\%
+\end{tabular}
+
+Additionally, we plotted the latency for each packet vs time on each run.
+Shown below are the first run of the internally-mounted Canakit adapter
+and the first run of the externally-mounted Canakit adapter.
+
+For many of the runs with the watchdog disabled, the robot did not drive
+straight ahead. Rather than estimating the distance that it travelled along
+a curve, I instead opted to measure the straight line distance. Therefore,
+measurements of the watchdog disabled should be regarded as minimums. On runs
+where the robot drove straight, it consistently drove between 16 and 17 feet
+(192-204 inches). 
+
+For the watchdog enabled measurements (0"-20") I measured to the nearest inch.
+For the watchdog disabled measurements (10 feet or more), I measured to the
+nearest half foot.
 
 
 \section{Discussion}
-From the results, we see that 
+From the results, we see that substantial improvements can be made 
 
 
 \section{Conclusions}
@@ -138,8 +184,9 @@ experience for remote control and navigation of the robot, and, indeed,
 driving after the changes were implemented was subjectively a much easier task
 than previously.
 
-However, it is still not a perfect task, and there are many avenues left for
-possible continued improvement. At the physical layer, adding a second
+However, driving the robot is still not a perfect experience, and there are
+many avenues left for possible continued improvement.
+At the physical layer, adding a second
 network card would provide failover capability, and could potentially be
 configured such that one network is always connected at a time, with packets
 routed over the strongest (or over both). At the TCP/IP layers, tuning the
