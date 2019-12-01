@@ -1,32 +1,20 @@
 \documentclass{IEEEtran}
 \usepackage{amsmath}
 \usepackage{hyperref}
-
+\usepackage{graphicx}
+\usepackage{listings}
 
 \title{Building a Resilient Control Scheme over Unreliable Wireless Networks}
 \author{Chandler Swift \\ ~ \\
   Spring--Fall 2019 \\
-  Computer Science Department \\
   Advisor: Dr. Peter A. H. Peterson \\
   Computer Science Department \\
   University of Minnesota Duluth
 }
-%\author{Michael~Shell,~\IEEEmembership{Member,~IEEE,}
-%        John~Doe,~\IEEEmembership{Fellow,~OSA,}
-%        and~Jane~Doe,~\IEEEmembership{Life~Fellow,~IEEE}% <-this % stops a space
-%\thanks{M. Shell was with the Department
-%of Electrical and Computer Engineering, Georgia Institute of Technology, Atlanta,
-%GA, 30332 USA e-mail: (see http://www.michaelshell.org/contact.html).}% <-this % stops a space
-%\thanks{J. Doe and J. Doe are with Anonymous University.}% <-this % stops a space
-%\thanks{Manuscript received April 19, 2005; revised August 26, 2015.}}
 
 \begin{document}
 
 \maketitle
-
-\begin{abstract}
-TODO TODO TODO
-\end{abstract}
 
 \section{Introduction}
 % TODO: don't announce the topic here.
@@ -102,7 +90,33 @@ that the robot's hardware controller does have a watchdog timer built in.
 However, this is of limited use to use in attempting to stop the robot, as
 the documentation does not suggest that it is configurable from its default
 value of ten seconds, during which time the robot can travel a dangerous
-distance.
+distance. While the full code is available on GitHub\cite{watchdog},
+reproduced here is a simplification of the main portion of the watchdog timer:
+
+\begin{lstlisting}[language=Python,basicstyle=\ttfamily]
+import time
+from threading import timer
+
+last_cmd_received = time.time()
+WATCHDOG_THRESHOLD = 0.100  # seconds
+
+# Runs every (100 plus the time elapsed
+# in the function)ms
+def run_watchdog():
+   elapsed = time.time() - last_cmd_received
+   if elapsed > WATCHDOG_THRESHOLD:
+      set_robot_drive(0,0)
+      Timer(0.1,run_watchdog).start() 
+
+def on_cmd(cmd):
+   global last_cmd_received
+   last_cmd_received = time.time()
+   ...
+
+def set_robot_drive(x,y):
+   ...
+\end{lstlisting}
+
 
 Evaluation of the effectiveness of this method was done by driving the robot
 at its full speed down the hall. When it passed a marked "starting line",
@@ -126,19 +140,7 @@ The hallway packet loss testing showed moderate but consistent improvements
 when utilizing the Canakit adapter as mounted outside of robot's metal frame
 as compared to using it internally.
 
-The internal adapter showed the following data:
-
-\begin{tabular}{ c | c | c | c | c }
-  Run & Total & Failed & Succeeded & Success Rate \\ \hline
-  1 & 635 & 227 & 408 & 64.3\% \\
-  2 & 730 & 226 & 464 & 63.6\% \\
-  3 & 600 & 141 & 459 & 76.5\% \\
-  4 & 552 & 193 & 359 & 65.0\% \\
-  \hline
-  \multicolumn{4}{r}{Average Success Rate:} & 67.3\%
-\end{tabular}
-
-While the external adapter showed the following data:
+The internal adapter resulted in the following data:
 
 \begin{tabular}{ c | c | c | c | c }
   Run & Total & Failed & Succeeded & Success Rate \\ \hline
@@ -150,9 +152,55 @@ While the external adapter showed the following data:
   \multicolumn{4}{r}{Average Success Rate:} & 56.0\%
 \end{tabular}
 
+While the external adapter showed the following data:
+
+\begin{tabular}{ c | c | c | c | c }
+  Run & Total & Failed & Succeeded & Success Rate \\ \hline
+  1 & 635 & 227 & 408 & 64.3\% \\
+  2 & 730 & 226 & 464 & 63.6\% \\
+  3 & 600 & 141 & 459 & 76.5\% \\
+  4 & 552 & 193 & 359 & 65.0\% \\
+  \hline
+  \multicolumn{4}{r}{Average Success Rate:} & 67.3\%
+\end{tabular}
+
+\begin{figure}
+  \includegraphics[width=\linewidth]{internal-1.png}
+  \caption{Internal Adapter, run 1}
+  \label{fig:int1}
+\end{figure}
+
+\begin{figure}
+  \includegraphics[width=\linewidth]{external-1.png}
+  \caption{External Adapter, run 1}
+  \label{fig:ext1}
+\end{figure}
+
 Additionally, we plotted the latency for each packet vs time on each run.
-Shown below are the first run of the internally-mounted Canakit adapter
-and the first run of the externally-mounted Canakit adapter.
+Shown are the first run of the internally-mounted Canakit adapter
+(Figure \ref{fig:int1}), and the first run of the externally-mounted Canakit
+adapter (Figure \ref{fig:ext1}). In these figures, the lightly shaded green
+background represents the connection to an access point, with the white
+indicating that the robot is not connected at that time. Response times along
+the top of the graph indicate timeouts at 150 milliseconds or greater.
+
+Meanwhile, for the watchdog testing, we took the following runs, eight each
+with the watchdog enabled and with it disabled:
+
+\begin{tabular}{ c | c | c }
+  \centering
+  Run & Enabled & Disabled \\ \hline
+  1 & 10 & 198 \\
+  2 & 13 & 144 \\
+  3 & 15 & 156 \\
+  4 & 15 & 192 \\
+  5 & 14 & 198 \\
+  6 &  8 & 156 \\
+  7 &  8 & 192 \\
+  8 &  4 & 168 \\
+  \hline
+  Average: & 10.9 & 176
+\end{tabular}
 
 For many of the runs with the watchdog disabled, the robot did not drive
 straight ahead. Rather than estimating the distance that it travelled along
@@ -161,13 +209,42 @@ measurements of the watchdog disabled should be regarded as minimums. On runs
 where the robot drove straight, it consistently drove between 16 and 17 feet
 (192-204 inches). 
 
-For the watchdog enabled measurements (0"-20") I measured to the nearest inch.
-For the watchdog disabled measurements (10 feet or more), I measured to the
-nearest half foot.
+For the measurements taken with the watchdog timer enabled (measuring 0 inches
+to 20 inches) I measured with precision to the nearest inch.
+For the measurements taken with the watchdog timer disabled (measuring 10 feet
+or more), I measured with precision to the half foot, or six inches.
 
 
 \section{Discussion}
-From the results, we see that substantial improvements can be made 
+From the data obtained here, we see that substantial improvements can be made
+to the reliable control of the robot by simply improving the placement and
+selection of the wireless adapter. Simply relocating the adapter to the outside
+of the metal enclosure reduced packet loss by over ten percent in the tests
+performed. Of note when looking at the figures provided, as well as the
+additional graphs displayed on the GitHub repository\cite{uropgithub} is the
+observation that the internally-mounted adapter disconnected from and
+reconnected the wifi three times, as compared to the externally-mounted
+adapter, which only disconnects and reconnects once.
+Furthermore, this is also perhaps not an entirely fair comparison, as we are
+comparing the best run of the internally-mounted adapter with the second-worst
+run of the externally-mounted adapter, which just serves to exemplify the
+effect that the shielding from the metal casing of the robot has on the
+performance of the wireless adapters.
+
+Further, we note that in these graphs, we see an increase in packet times as
+some amount of time before the before all packets are lost and the connection
+is dropped. Presumably, the increased loss (and therefore decreased goodput)
+coorelate with decreasing signal strength. 
+
+With regard to the watchdog, we notice much more dramatic improvements, with
+stop times after signal is lost being an order of magnitude smaller. This will
+lead to much easier regain of control after the signal is lost, and
+drastically reduce the chances of damage happening to a robot when signal is
+lost. During several of the test runs without the watchdog timer enabled, if 
+the robot was not started perfectly straight, it had to be intercepted before
+it ran into the wall or another obstacle, which was fairly likely with a
+fifteen foot range. The watchdog effectively removed these demands from the
+robot's operator.
 
 
 \section{Conclusions}
