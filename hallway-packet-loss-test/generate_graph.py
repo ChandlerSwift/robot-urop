@@ -23,8 +23,8 @@ for filename in sys.argv[1:]:
     connected = False
     prev_datum = {'ssid': 'dBm'} # Hackety hack hack
     for datum in data:
-        if datum['ssid'] != prev_datum['ssid']:
-            if datum['ssid'] != 'dBm': # we just connected
+        if datum['ssid'] != prev_datum['ssid']: # Connection status changed
+            if datum['ssid'][2] == ':': # There's a colon at position 2, meaning it's a MAC address
                 print('connected')
                 connected = True
                 start_time = float(datum['time']) * 1000
