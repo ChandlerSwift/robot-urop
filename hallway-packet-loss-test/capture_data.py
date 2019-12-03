@@ -15,7 +15,7 @@ def ping():
         ping_output=subprocess.run(['ping','-c','1','ahti.d.umn.edu'],timeout=0.15,stdout=subprocess.PIPE)
         ping_ms=ping_output.stdout.decode().split("\n")[1].split()[-2].split("=")[1]
     except:
-        return "401"
+        return "151" # We should max out at 150 otherwise.
     return ping_ms
 
 last_time = time.time()
