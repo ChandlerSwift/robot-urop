@@ -95,7 +95,7 @@ reproduced here is a simplification of the main portion of the watchdog timer:
 
 \begin{lstlisting}[language=Python,basicstyle=\ttfamily]
 import time
-from threading import timer
+from threading import Timer
 
 last_cmd_received = time.time()
 WATCHDOG_THRESHOLD = 0.100  # seconds
