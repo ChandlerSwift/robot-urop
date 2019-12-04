@@ -10,6 +10,9 @@ project.
 
 ### Links
 [Information about the robot](https://duluth.chandlerswift.com/robot/)
+
 [Control the robot](https://robot.net.chandlerswift.com/)
+
 [Robot's GitHub Repo/misc collected resources](https://github.com/umdacm/robot)
+
 [View graphs of hallway test data](https://chandlerswift.github.io/robot-urop/)
