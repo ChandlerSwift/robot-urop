@@ -4,6 +4,8 @@ Spring-Fall 2019
 
 [Proposal Document](https://github.com/ChandlerSwift/duluth-robot-site/blob/master/proposal.pdf)
 
+[Final Report](https://github.com/ChandlerSwift/robot-urop/blob/master/report/report.pdf)
+
 This is the repo for the research I'm doing on the [UMD](https://d.umn.edu/)
 CS Department's Mobility Magellan Pro robot as an undergraduate research
 project.
